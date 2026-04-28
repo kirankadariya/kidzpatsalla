@@ -1,1 +1,1301 @@
-<!-- Full file will be written via python -->
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#534AB7">
+  <meta name="description" content="Fun Nepali language learning app for kids aged 5-8">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Nepali Sikau">
+  <title>Nepali Sikau 🇳🇵</title>
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+  <style>
+    :root {
+      --primary: #534AB7;
+      --primary-light: #7B72D4;
+      --primary-dark: #3a3380;
+      --accent: #FF6B6B;
+      --accent2: #FFD93D;
+      --bg: #EEEDFE;
+      --white: #FFFFFF;
+      --text: #1a1a2e;
+      --text-light: #666;
+      --card-bg: #FFFFFF;
+      --nav-h: 64px;
+      --header-h: 58px;
+      --radius: 16px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html, body { height: 100%; overflow: hidden; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      max-width: 480px;
+      margin: 0 auto;
+      position: relative;
+      height: 100%;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      background: var(--primary);
+      color: white;
+      height: var(--header-h);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      position: fixed;
+      top: 0;
+      left: 0; right: 0;
+      max-width: 480px;
+      margin: 0 auto;
+      z-index: 200;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    .header-title { font-size: 1.2rem; font-weight: 700; }
+    .header-score {
+      background: rgba(255,255,255,0.2);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    /* ── MAIN SCROLL AREA ── */
+    .main {
+      position: fixed;
+      top: var(--header-h);
+      bottom: var(--nav-h);
+      left: 0; right: 0;
+      max-width: 480px;
+      margin: 0 auto;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 12px;
+    }
+
+    /* ── BOTTOM NAV ── */
+    .nav {
+      position: fixed;
+      bottom: 0;
+      left: 0; right: 0;
+      max-width: 480px;
+      margin: 0 auto;
+      height: var(--nav-h);
+      background: var(--white);
+      border-top: 1px solid #ddd;
+      display: flex;
+      z-index: 200;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.08);
+    }
+    .nav-btn {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      color: #999;
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      transition: color 0.2s;
+      padding: 6px 0;
+    }
+    .nav-btn .icon { font-size: 1.5rem; line-height: 1; }
+    .nav-btn.active { color: var(--primary); }
+    .nav-btn.active .icon { filter: drop-shadow(0 0 4px rgba(83,74,183,0.4)); }
+
+    /* ── SECTION VISIBILITY ── */
+    .section { display: none; }
+    .section.active { display: block; }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      margin-bottom: 12px;
+    }
+
+    /* ── LEARN: CATEGORY GRID ── */
+    .cat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .cat-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 14px 8px;
+      text-align: center;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: transform 0.15s, box-shadow 0.15s;
+      border: 2px solid transparent;
+    }
+    .cat-card:active { transform: scale(0.96); }
+    .cat-card .cat-emoji { font-size: 2rem; display: block; margin-bottom: 4px; }
+    .cat-card .cat-name { font-size: 0.72rem; font-weight: 700; color: var(--primary); }
+    .cat-card .cat-count { font-size: 0.62rem; color: var(--text-light); margin-top: 2px; }
+
+    /* ── LEARN: WORD CARDS ── */
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 20px;
+      padding: 8px 16px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 12px;
+    }
+    .words-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    .word-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 16px 12px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      cursor: pointer;
+      transition: transform 0.15s;
+      position: relative;
+      border: 2px solid transparent;
+    }
+    .word-card:active { transform: scale(0.96); }
+    .word-card.learned { border-color: #4CAF50; }
+    .word-card .word-emoji { font-size: 2.2rem; display: block; margin-bottom: 6px; }
+    .word-card .word-nep {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1.2;
+      display: block;
+    }
+    .word-card .word-roman { font-size: 0.72rem; color: var(--text-light); margin: 2px 0; }
+    .word-card .word-eng { font-size: 0.82rem; font-weight: 600; color: var(--text); }
+    .word-card .sound-btn {
+      position: absolute;
+      top: 8px; right: 8px;
+      background: var(--bg);
+      border: none;
+      border-radius: 50%;
+      width: 28px; height: 28px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s;
+    }
+    .word-card .sound-btn:active { background: var(--primary); }
+    .word-card .learned-badge {
+      position: absolute;
+      top: 8px; left: 8px;
+      font-size: 0.7rem;
+      background: #4CAF50;
+      color: white;
+      border-radius: 10px;
+      padding: 1px 6px;
+      font-weight: 600;
+    }
+
+    /* ── QUIZ ── */
+    .quiz-wrap { padding: 4px 0; }
+    .quiz-question {
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: white;
+      border-radius: var(--radius);
+      padding: 24px 20px;
+      text-align: center;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 16px rgba(83,74,183,0.3);
+    }
+    .quiz-prompt { font-size: 0.85rem; opacity: 0.85; margin-bottom: 8px; }
+    .quiz-word { font-size: 3rem; font-weight: 700; line-height: 1.2; }
+    .quiz-word-small { font-size: 1rem; opacity: 0.9; margin-top: 4px; }
+    .quiz-sound-btn {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      border-radius: 20px;
+      color: white;
+      padding: 6px 16px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background 0.2s;
+    }
+    .quiz-sound-btn:active { background: rgba(255,255,255,0.35); }
+    .quiz-options {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    .quiz-opt {
+      background: var(--card-bg);
+      border: 2px solid #e0e0e0;
+      border-radius: var(--radius);
+      padding: 14px 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      transition: border-color 0.15s, background 0.15s;
+      color: var(--text);
+    }
+    .quiz-opt:active { background: var(--bg); }
+    .quiz-opt.correct { background: #E8F5E9; border-color: #4CAF50; color: #2E7D32; }
+    .quiz-opt.wrong { background: #FFEBEE; border-color: #F44336; color: #C62828; }
+    .quiz-opt:disabled { cursor: default; }
+    .quiz-result {
+      text-align: center;
+      padding: 12px;
+      border-radius: var(--radius);
+      font-size: 1rem;
+      font-weight: 700;
+      margin-top: 12px;
+    }
+    .quiz-result.correct { background: #E8F5E9; color: #2E7D32; }
+    .quiz-result.wrong { background: #FFEBEE; color: #C62828; }
+    .quiz-next-btn {
+      display: block;
+      width: 100%;
+      margin-top: 12px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 24px;
+      padding: 14px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .quiz-next-btn:active { background: var(--primary-dark); }
+    .quiz-score-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 10px 16px;
+      margin-bottom: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+
+    /* ── TRACE ── */
+    .trace-wrap { text-align: center; padding: 4px 0; }
+    .trace-letter-display {
+      font-size: 1.4rem;
+      color: var(--primary);
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .trace-sub { font-size: 0.82rem; color: var(--text-light); margin-bottom: 12px; }
+    .canvas-wrap {
+      position: relative;
+      display: inline-block;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    }
+    #traceCanvas {
+      display: block;
+      cursor: crosshair;
+      touch-action: none;
+      background: #fff;
+    }
+    .trace-controls {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+    .trace-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 20px;
+      padding: 10px 20px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .trace-btn.secondary {
+      background: var(--bg);
+      color: var(--primary);
+    }
+    .trace-btn:active { opacity: 0.8; }
+    .trace-letters-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 16px;
+    }
+    .trace-letter-chip {
+      background: var(--card-bg);
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      padding: 6px 10px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: border-color 0.15s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .trace-letter-chip.active { border-color: var(--primary); background: var(--bg); }
+
+    /* ── VIDEOS ── */
+    .videos-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    .video-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      overflow: hidden;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: transform 0.15s;
+    }
+    .video-card:active { transform: scale(0.97); }
+    .video-thumb {
+      position: relative;
+      padding-top: 56.25%;
+      background: #000;
+      overflow: hidden;
+    }
+    .video-thumb img {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+    .video-play-icon {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(83,74,183,0.85);
+      color: white;
+      border-radius: 50%;
+      width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+    }
+    .video-info { padding: 8px 10px; }
+    .video-title { font-size: 0.75rem; font-weight: 700; color: var(--text); line-height: 1.3; }
+    .video-desc { font-size: 0.65rem; color: var(--text-light); margin-top: 2px; }
+
+    /* Video modal */
+    .video-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 500;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .video-modal.open { display: flex; }
+    .video-modal-inner {
+      background: #000;
+      border-radius: var(--radius);
+      overflow: hidden;
+      width: 100%;
+      max-width: 460px;
+    }
+    .video-modal-close {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      background: #111;
+      padding: 8px 12px;
+    }
+    .video-modal-close button {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 4px 8px;
+    }
+    .video-iframe-wrap {
+      position: relative;
+      padding-top: 56.25%;
+    }
+    .video-iframe-wrap iframe {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      border: none;
+    }
+
+    /* ── BADGES ── */
+    .progress-card {
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: white;
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 16px rgba(83,74,183,0.3);
+    }
+    .progress-title { font-size: 1rem; font-weight: 700; margin-bottom: 12px; opacity: 0.9; }
+    .stars-row { display: flex; gap: 6px; font-size: 1.8rem; margin-bottom: 12px; }
+    .progress-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .stat-box {
+      background: rgba(255,255,255,0.15);
+      border-radius: 10px;
+      padding: 10px 8px;
+      text-align: center;
+    }
+    .stat-num { font-size: 1.5rem; font-weight: 700; }
+    .stat-label { font-size: 0.65rem; opacity: 0.85; margin-top: 2px; }
+    .badges-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+    .badges-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .badge-item {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 14px 8px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      transition: transform 0.15s;
+    }
+    .badge-item.locked { opacity: 0.4; filter: grayscale(1); }
+    .badge-item .badge-icon { font-size: 2rem; display: block; margin-bottom: 6px; }
+    .badge-item .badge-name { font-size: 0.68rem; font-weight: 700; color: var(--primary); }
+    .badge-item .badge-desc { font-size: 0.6rem; color: var(--text-light); margin-top: 2px; line-height: 1.3; }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      bottom: calc(var(--nav-h) + 12px);
+      left: 50%; transform: translateX(-50%);
+      background: var(--text);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      z-index: 400;
+      opacity: 0;
+      transition: opacity 0.3s;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; }
+
+    /* ── SCROLLBAR ── */
+    .main::-webkit-scrollbar { width: 4px; }
+    .main::-webkit-scrollbar-thumb { background: #ccc; border-radius: 2px; }
+
+    /* ── SECTION TITLE ── */
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* ── INSTALL BANNER ── */
+    .install-banner {
+      background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+      color: white;
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(255,107,107,0.3);
+    }
+    .install-banner-text { font-size: 0.82rem; font-weight: 600; }
+    .install-banner-btn {
+      background: white;
+      color: #FF6B6B;
+      border: none;
+      border-radius: 16px;
+      padding: 6px 14px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      margin-left: 10px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1a1a2e;
+        --card-bg: #252545;
+        --text: #f0f0ff;
+        --text-light: #aaa;
+      }
+      .nav { background: #252545; border-top-color: #333; }
+      .header { background: #3a3380; }
+      .quiz-opt { background: #252545; border-color: #444; color: #f0f0ff; }
+      .trace-letter-chip { background: #252545; border-color: #444; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-title">🇳🇵 Nepali Sikau</div>
+  <div class="header-score" id="headerScore">⭐ 0 pts</div>
+</header>
+
+<!-- MAIN CONTENT -->
+<main class="main" id="mainArea">
+
+  <!-- ── LEARN SECTION ── -->
+  <section class="section active" id="sec-learn">
+    <div id="learn-categories">
+      <div class="section-title">📚 के सिक्ने? (What to Learn?)</div>
+      <div class="cat-grid" id="catGrid"></div>
+    </div>
+    <div id="learn-words" style="display:none;">
+      <button class="back-btn" id="backToCats">← पछाडि (Back)</button>
+      <div class="section-title" id="catTitle"></div>
+      <div class="words-grid" id="wordsGrid"></div>
+    </div>
+  </section>
+
+  <!-- ── QUIZ SECTION ── -->
+  <section class="section" id="sec-quiz">
+    <div class="quiz-score-bar">
+      <span>🎯 Quiz Score</span>
+      <span id="quizScoreDisplay">0 / 0 correct</span>
+    </div>
+    <div id="quizArea"></div>
+  </section>
+
+  <!-- ── TRACE SECTION ── -->
+  <section class="section" id="sec-trace">
+    <div class="trace-wrap">
+      <div class="section-title" style="justify-content:center;">✏️ अक्षर लेख्नुस् (Trace Letters)</div>
+      <div class="trace-letter-display" id="traceLetterDisplay"></div>
+      <div class="trace-sub" id="traceLetterSub"></div>
+      <div class="canvas-wrap">
+        <canvas id="traceCanvas" width="320" height="280"></canvas>
+      </div>
+      <div class="trace-controls">
+        <button class="trace-btn secondary" id="traceClearBtn">🧹 Clear</button>
+        <button class="trace-btn" id="traceSoundBtn">🔊 Listen</button>
+        <button class="trace-btn" id="traceNextBtn">Next →</button>
+      </div>
+      <div style="margin-top:16px;">
+        <div style="font-size:0.8rem;color:var(--text-light);margin-bottom:8px;font-weight:600;">Pick a letter:</div>
+        <div class="trace-letters-row" id="traceLettersRow"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── VIDEOS SECTION ── -->
+  <section class="section" id="sec-videos">
+    <div class="section-title">🎬 भिडियो (Videos)</div>
+    <div class="videos-grid" id="videosGrid"></div>
+  </section>
+
+  <!-- ── BADGES SECTION ── -->
+  <section class="section" id="sec-badges">
+    <div class="progress-card" id="progressCard">
+      <div class="progress-title">⭐ तपाईंको प्रगति (Your Progress)</div>
+      <div class="stars-row" id="starsRow"></div>
+      <div class="progress-stats">
+        <div class="stat-box"><div class="stat-num" id="statWords">0</div><div class="stat-label">Words Learned</div></div>
+        <div class="stat-box"><div class="stat-num" id="statQuiz">0</div><div class="stat-label">Quizzes Done</div></div>
+        <div class="stat-box"><div class="stat-num" id="statPoints">0</div><div class="stat-label">Points</div></div>
+      </div>
+    </div>
+    <div class="badges-title">🏆 Badges (बाजहरू)</div>
+    <div class="badges-grid" id="badgesGrid"></div>
+  </section>
+</main>
+
+<!-- BOTTOM NAV -->
+<nav class="nav">
+  <button class="nav-btn active" data-tab="learn" onclick="switchTab('learn')">
+    <span class="icon">📚</span><span>Learn</span>
+  </button>
+  <button class="nav-btn" data-tab="quiz" onclick="switchTab('quiz')">
+    <span class="icon">🎯</span><span>Quiz</span>
+  </button>
+  <button class="nav-btn" data-tab="trace" onclick="switchTab('trace')">
+    <span class="icon">✏️</span><span>Trace</span>
+  </button>
+  <button class="nav-btn" data-tab="videos" onclick="switchTab('videos')">
+    <span class="icon">🎬</span><span>Videos</span>
+  </button>
+  <button class="nav-btn" data-tab="badges" onclick="switchTab('badges')">
+    <span class="icon">🏆</span><span>Badges</span>
+  </button>
+</nav>
+
+<!-- VIDEO MODAL -->
+<div class="video-modal" id="videoModal">
+  <div class="video-modal-inner">
+    <div class="video-modal-close">
+      <button onclick="closeVideo()">✕ Close</button>
+    </div>
+    <div class="video-iframe-wrap">
+      <iframe id="videoIframe" src="" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  DATA
+// ═══════════════════════════════════════════════════════════
+const CATEGORIES = [
+  {
+    id: 'alphabet', name: 'Alphabet', nep: 'वर्णमाला', emoji: '🔤',
+    words: [
+      {n:'अ',r:'a',e:'a',em:'🅰️'},{n:'आ',r:'aa',e:'aa',em:'🔡'},{n:'इ',r:'i',e:'i',em:'🔡'},
+      {n:'ई',r:'ii',e:'ii',em:'🔡'},{n:'उ',r:'u',e:'u',em:'🔡'},{n:'ऊ',r:'uu',e:'uu',em:'🔡'},
+      {n:'ए',r:'e',e:'e',em:'🔡'},{n:'ऐ',r:'ai',e:'ai',em:'🔡'},{n:'ओ',r:'o',e:'o',em:'🔡'},
+      {n:'औ',r:'au',e:'au',em:'🔡'},{n:'क',r:'ka',e:'ka',em:'🔤'},{n:'ख',r:'kha',e:'kha',em:'🔤'},
+      {n:'ग',r:'ga',e:'ga',em:'🔤'},{n:'घ',r:'gha',e:'gha',em:'🔤'},{n:'च',r:'cha',e:'cha',em:'🔤'},
+      {n:'छ',r:'chha',e:'chha',em:'🔤'},{n:'ज',r:'ja',e:'ja',em:'🔤'},{n:'झ',r:'jha',e:'jha',em:'🔤'},
+      {n:'ट',r:'ṭa',e:'ta',em:'🔤'},{n:'ठ',r:'ṭha',e:'tha',em:'🔤'},{n:'ड',r:'ḍa',e:'da',em:'🔤'},
+      {n:'ण',r:'ṇa',e:'na',em:'🔤'},{n:'त',r:'ta',e:'ta',em:'🔤'},{n:'थ',r:'tha',e:'tha',em:'🔤'},
+      {n:'द',r:'da',e:'da',em:'🔤'},{n:'ध',r:'dha',e:'dha',em:'🔤'},{n:'न',r:'na',e:'na',em:'🔤'},
+      {n:'प',r:'pa',e:'pa',em:'🔤'},{n:'फ',r:'pha',e:'pha',em:'🔤'},{n:'ब',r:'ba',e:'ba',em:'🔤'},
+      {n:'भ',r:'bha',e:'bha',em:'🔤'},{n:'म',r:'ma',e:'ma',em:'🔤'},{n:'य',r:'ya',e:'ya',em:'🔤'},
+      {n:'र',r:'ra',e:'ra',em:'🔤'},{n:'ल',r:'la',e:'la',em:'🔤'},{n:'व',r:'wa',e:'wa',em:'🔤'},
+      {n:'श',r:'sha',e:'sha',em:'🔤'},{n:'स',r:'sa',e:'sa',em:'🔤'},{n:'ह',r:'ha',e:'ha',em:'🔤'},
+      {n:'क्ष',r:'ksha',e:'ksha',em:'🔤'},{n:'त्र',r:'tra',e:'tra',em:'🔤'},{n:'ज्ञ',r:'gya',e:'gya',em:'🔤'}
+    ]
+  },
+  {
+    id: 'numbers', name: 'Numbers', nep: 'संख्या', emoji: '🔢',
+    words: [
+      {n:'१',r:'ek',e:'One',em:'1️⃣'},{n:'२',r:'dui',e:'Two',em:'2️⃣'},{n:'३',r:'teen',e:'Three',em:'3️⃣'},
+      {n:'४',r:'char',e:'Four',em:'4️⃣'},{n:'५',r:'paanch',e:'Five',em:'5️⃣'},{n:'६',r:'chha',e:'Six',em:'6️⃣'},
+      {n:'७',r:'saat',e:'Seven',em:'7️⃣'},{n:'८',r:'aath',e:'Eight',em:'8️⃣'},{n:'९',r:'nau',e:'Nine',em:'9️⃣'},
+      {n:'१०',r:'das',e:'Ten',em:'🔟'},{n:'शून्य',r:'shunya',e:'Zero',em:'0️⃣'},{n:'एक सय',r:'ek say',e:'One Hundred',em:'💯'}
+    ]
+  },
+  {
+    id: 'phrases', name: 'Phrases', nep: 'वाक्यांश', emoji: '💬',
+    words: [
+      {n:'नमस्ते',r:'Namaste',e:'Hello',em:'🙏'},{n:'धन्यवाद',r:'Dhanyabaad',e:'Thank you',em:'😊'},
+      {n:'शुभ बिहान',r:'Shubha Bihaan',e:'Good morning',em:'🌅'},{n:'शुभ रात्री',r:'Shubha Raatri',e:'Good night',em:'🌙'},
+      {n:'मलाई माया छ',r:'Malai maaya chha',e:'I love you',em:'❤️'},{n:'माफ गर्नुस्',r:'Maaf garnuhos',e:'Sorry',em:'🙏'},
+      {n:'हजुर',r:'Hajur',e:'Yes / OK',em:'✅'},{n:'होइन',r:'Hoina',e:'No',em:'❌'},
+      {n:'खाना खाऊँ',r:"Khana khaau",e:"Let's eat",em:'🍽️'},{n:'कसरी हुनुहुन्छ?',r:'Kasari hunuhuncha?',e:'How are you?',em:'😀'},
+      {n:'राम्रो छ',r:'Ramro chha',e:"I'm good",em:'😄'},{n:'फेरि भेटौँला',r:'Pheri bhetaula',e:'See you again',em:'👋'}
+    ]
+  },
+  {
+    id: 'animals', name: 'Animals', nep: 'जनावर', emoji: '🐾',
+    words: [
+      {n:'बिरालो',r:'Biralo',e:'Cat',em:'🐱'},{n:'कुकुर',r:'Kukur',e:'Dog',em:'🐶'},
+      {n:'गाई',r:'Gai',e:'Cow',em:'🐄'},{n:'हात्ती',r:'Haatti',e:'Elephant',em:'🐘'},
+      {n:'बाघ',r:'Baagh',e:'Tiger',em:'🐯'},{n:'माछा',r:'Maachha',e:'Fish',em:'🐟'},
+      {n:'चरा',r:'Chara',e:'Bird',em:'🐦'},{n:'बाँदर',r:'Baandar',e:'Monkey',em:'🐒'},
+      {n:'सिंह',r:'Sinha',e:'Lion',em:'🦁'},{n:'साँप',r:'Saanp',e:'Snake',em:'🐍'},
+      {n:'मुसा',r:'Musa',e:'Mouse',em:'🐭'},{n:'भालु',r:'Bhaalu',e:'Bear',em:'🐻'}
+    ]
+  },
+  {
+    id: 'colors', name: 'Colors', nep: 'रङ', emoji: '🎨',
+    words: [
+      {n:'रातो',r:'Raato',e:'Red',em:'🔴'},{n:'नीलो',r:'Nilo',e:'Blue',em:'🔵'},
+      {n:'हरियो',r:'Hariyo',e:'Green',em:'🟢'},{n:'पहेँलो',r:'Pahelo',e:'Yellow',em:'🟡'},
+      {n:'सेतो',r:'Seto',e:'White',em:'⚪'},{n:'कालो',r:'Kaalo',e:'Black',em:'⚫'},
+      {n:'सुन्तला',r:'Suntala',e:'Orange',em:'🟠'},{n:'गुलाबी',r:'Gulabi',e:'Pink',em:'🩷'},
+      {n:'बैगनी',r:'Baigani',e:'Purple',em:'🟣'},{n:'खैरो',r:'Khairo',e:'Brown',em:'🟤'},
+      {n:'आकाशे',r:'Aakaashe',e:'Sky Blue',em:'🔷'},{n:'सुनौलो',r:'Sunaulo',e:'Golden',em:'🌟'}
+    ]
+  },
+  {
+    id: 'body', name: 'Body', nep: 'शरीर', emoji: '🧍',
+    words: [
+      {n:'टाउको',r:'Taauko',e:'Head',em:'👤'},{n:'आँखा',r:'Aankha',e:'Eyes',em:'👀'},
+      {n:'नाक',r:'Naak',e:'Nose',em:'👃'},{n:'मुख',r:'Mukh',e:'Mouth',em:'👄'},
+      {n:'कान',r:'Kaan',e:'Ear',em:'👂'},{n:'हात',r:'Haat',e:'Hand',em:'✋'},
+      {n:'खुट्टा',r:'Khutta',e:'Foot',em:'🦶'},{n:'पेट',r:'Pet',e:'Stomach',em:'🫃'},
+      {n:'ढाड',r:'Dhaad',e:'Back',em:'🔙'},{n:'औँला',r:'Aula',e:'Finger',em:'☝️'},
+      {n:'दाँत',r:'Daaṃt',e:'Teeth',em:'🦷'},{n:'कपाल',r:'Kapaal',e:'Hair',em:'💇'}
+    ]
+  },
+  {
+    id: 'food', name: 'Food', nep: 'खाना', emoji: '🍛',
+    words: [
+      {n:'भात',r:'Bhaat',e:'Rice',em:'🍚'},{n:'दाल',r:'Daal',e:'Lentils',em:'🥣'},
+      {n:'तरकारी',r:'Tarkaari',e:'Vegetables',em:'🥦'},{n:'रोटी',r:'Roti',e:'Bread',em:'🫓'},
+      {n:'दूध',r:'Doodh',e:'Milk',em:'🥛'},{n:'पानी',r:'Paani',e:'Water',em:'💧'},
+      {n:'चिया',r:'Chiyaa',e:'Tea',em:'🍵'},{n:'केरा',r:'Kera',e:'Banana',em:'🍌'},
+      {n:'स्याउ',r:'Syaau',e:'Apple',em:'🍎'},{n:'आँप',r:'Aaṃp',e:'Mango',em:'🥭'},
+      {n:'आलु',r:'Aalu',e:'Potato',em:'🥔'},{n:'अण्डा',r:'Anda',e:'Egg',em:'🥚'}
+    ]
+  },
+  {
+    id: 'nature', name: 'Nature', nep: 'प्रकृति', emoji: '🌿',
+    words: [
+      {n:'सूर्य',r:'Surya',e:'Sun',em:'☀️'},{n:'चन्द्रमा',r:'Chandrama',e:'Moon',em:'🌙'},
+      {n:'तारा',r:'Tara',e:'Star',em:'⭐'},{n:'आकाश',r:'Aakaash',e:'Sky',em:'🌤️'},
+      {n:'पहाड',r:'Pahad',e:'Mountain',em:'⛰️'},{n:'नदी',r:'Nadi',e:'River',em:'🏞️'},
+      {n:'जंगल',r:'Jangal',e:'Forest',em:'🌲'},{n:'फूल',r:'Phool',e:'Flower',em:'🌸'},
+      {n:'पत्थर',r:'Patthar',e:'Stone',em:'🪨'},{n:'हावा',r:'Haawaa',e:'Wind',em:'💨'},
+      {n:'वर्षा',r:'Varsha',e:'Rain',em:'🌧️'},{n:'बर्फ',r:'Barf',e:'Snow',em:'❄️'}
+    ]
+  },
+  {
+    id: 'family', name: 'Family', nep: 'परिवार', emoji: '👨‍👩‍👧',
+    words: [
+      {n:'आमा',r:'Aama',e:'Mother',em:'👩'},{n:'बुवा',r:'Buwa',e:'Father',em:'👨'},
+      {n:'दिदी',r:'Didi',e:'Older Sister',em:'👧'},{n:'दाई',r:'Dai',e:'Older Brother',em:'👦'},
+      {n:'बहिनी',r:'Bahini',e:'Younger Sister',em:'🧒'},{n:'भाइ',r:'Bhai',e:'Younger Brother',em:'🧒'},
+      {n:'हजुरआमा',r:'Hajuraama',e:'Grandmother',em:'👵'},{n:'हजुरबुवा',r:'Hajurbuwa',e:'Grandfather',em:'👴'},
+      {n:'काका',r:'Kaaka',e:'Uncle',em:'👨'},{n:'काकी',r:'Kaaki',e:'Aunt',em:'👩'},
+      {n:'साथी',r:'Saathi',e:'Friend',em:'🤝'},{n:'परिवार',r:'Pariwar',e:'Family',em:'👨‍👩‍👧‍👦'}
+    ]
+  }
+];
+
+const TRACE_LETTERS = [
+  {n:'क',r:'ka'},{n:'ख',r:'kha'},{n:'ग',r:'ga'},{n:'घ',r:'gha'},
+  {n:'च',r:'cha'},{n:'ज',r:'ja'},{n:'त',r:'ta'},{n:'द',r:'da'},
+  {n:'न',r:'na'},{n:'प',r:'pa'},{n:'ब',r:'ba'},{n:'म',r:'ma'},
+  {n:'य',r:'ya'},{n:'र',r:'ra'},{n:'ल',r:'la'},{n:'ह',r:'ha'},
+  {n:'अ',r:'a'},{n:'आ',r:'aa'},{n:'इ',r:'i'},{n:'उ',r:'u'},
+  {n:'ए',r:'e'},{n:'ओ',r:'o'}
+];
+
+const VIDEOS = [
+  {id:'yEKyEV8P4TM', title:'क ख ग घ — Nepali Alphabet', desc:'Learn the Nepali alphabet with fun animation'},
+  {id:'3cJJzH_1jaI', title:'Nepali Numbers Song', desc:'Count 1-10 in Nepali with catchy rhymes'},
+  {id:'sOKNV8xLCio', title:'Nepali Rhymes for Kids', desc:'Fun Nepali nursery rhymes for little ones'},
+  {id:'6kHI0K1T8nA', title:'Nepali Colors Song', desc:'Learn colors in Nepali with songs'},
+  {id:'nGaLsOFe7m4', title:'Animals in Nepali', desc:'Learn animal names in Nepali'},
+  {id:'S1oKTItNKCo', title:'Nepali Body Parts', desc:'Head, shoulders, knees and toes in Nepali'},
+  {id:'rINHouKHkEo', title:'Nepali Family Song', desc:'Learn family words with a Nepali song'},
+  {id:'qHXDyAqiFeE', title:'Devanagari Writing', desc:'How to write Devanagari letters step by step'},
+  {id:'c_HUe_JSGYM', title:'Nepali Kids Story', desc:'A short story in simple Nepali'},
+  {id:'OEn5H4IvFdQ', title:'Nepali Food Names', desc:'Learn food vocabulary in Nepali'},
+  {id:'JB0TFqMiPYc', title:'Nature in Nepali', desc:'Sun, moon, stars and more in Nepali'},
+  {id:'TBPnVBM9VPc', title:'Nepali Phrases for Kids', desc:'Useful daily phrases for kids'}
+];
+
+const BADGES = [
+  {id:'b1', icon:'🌱', name:'First Word', desc:'Learn your first word', req: s => s.wordsLearned >= 1},
+  {id:'b2', icon:'📚', name:'Explorer', desc:'Learn 10 words', req: s => s.wordsLearned >= 10},
+  {id:'b3', icon:'🎓', name:'Scholar', desc:'Learn 30 words', req: s => s.wordsLearned >= 30},
+  {id:'b4', icon:'🎯', name:'Quiz Starter', desc:'Complete 1 quiz', req: s => s.quizzesDone >= 1},
+  {id:'b5', icon:'🧠', name:'Quiz Master', desc:'Complete 10 quizzes', req: s => s.quizzesDone >= 10},
+  {id:'b6', icon:'✏️', name:'Tracer', desc:'Trace 5 letters', req: s => s.lettersTraced >= 5},
+  {id:'b7', icon:'🎬', name:'Video Fan', desc:'Watch 1 video', req: s => s.videosWatched >= 1},
+  {id:'b8', icon:'🔊', name:'Speaker', desc:'Use sound 10 times', req: s => s.soundsPlayed >= 10},
+  {id:'b9', icon:'🌟', name:'Star Learner', desc:'Earn 100 points', req: s => s.points >= 100},
+  {id:'b10', icon:'🏆', name:'Champion', desc:'Earn 500 points', req: s => s.points >= 500},
+  {id:'b11', icon:'🇳🇵', name:'Nepali Speaker', desc:'Learn all Phrases', req: s => {
+    const phrases = CATEGORIES.find(c=>c.id==='phrases');
+    return phrases && phrases.words.every(w => (s.learnedWords || []).includes('phrases:'+w.n));
+  }},
+  {id:'b12', icon:'💎', name:'Diamond', desc:'Earn 1000 points', req: s => s.points >= 1000}
+];
+
+// ═══════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════
+let state = {
+  points: 0,
+  wordsLearned: 0,
+  quizzesDone: 0,
+  lettersTraced: 0,
+  videosWatched: 0,
+  soundsPlayed: 0,
+  learnedWords: [],
+  quizCorrect: 0,
+  quizTotal: 0
+};
+
+function loadState() {
+  try {
+    const saved = localStorage.getItem('nepali-sikau-state');
+    if (saved) state = Object.assign(state, JSON.parse(saved));
+  } catch(e) {}
+}
+
+function saveState() {
+  try { localStorage.setItem('nepali-sikau-state', JSON.stringify(state)); } catch(e) {}
+}
+
+function addPoints(pts) {
+  state.points += pts;
+  updateHeaderScore();
+  saveState();
+}
+
+function updateHeaderScore() {
+  document.getElementById('headerScore').textContent = '⭐ ' + state.points + ' pts';
+}
+
+// ═══════════════════════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════════════════════
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════════════════════
+function switchTab(tab) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('sec-' + tab).classList.add('active');
+  document.querySelector('[data-tab="' + tab + '"]').classList.add('active');
+  document.getElementById('mainArea').scrollTop = 0;
+  if (tab === 'badges') renderBadges();
+  if (tab === 'quiz') renderQuiz();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  TTS (Text-to-Speech)
+// ═══════════════════════════════════════════════════════════
+function speak(text) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.lang = 'ne-NP';
+  utt.rate = 0.85;
+  utt.pitch = 1.1;
+  // Try to find a Nepali voice, fall back to any Hindi voice, then default
+  const voices = window.speechSynthesis.getVoices();
+  const ne = voices.find(v => v.lang.startsWith('ne')) ||
+             voices.find(v => v.lang.startsWith('hi')) || null;
+  if (ne) utt.voice = ne;
+  window.speechSynthesis.speak(utt);
+  state.soundsPlayed++;
+  saveState();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  LEARN
+// ═══════════════════════════════════════════════════════════
+function renderCategories() {
+  const grid = document.getElementById('catGrid');
+  grid.innerHTML = CATEGORIES.map(cat => {
+    const total = cat.words.length;
+    const learned = cat.words.filter(w => state.learnedWords.includes(cat.id+':'+w.n)).length;
+    return `<div class="cat-card" onclick="openCategory('${cat.id}')">
+      <span class="cat-emoji">${cat.emoji}</span>
+      <div class="cat-name">${cat.name}</div>
+      <div class="cat-name" style="font-size:0.62rem;color:var(--text-light)">${cat.nep}</div>
+      <div class="cat-count">${learned}/${total} learned</div>
+    </div>`;
+  }).join('');
+}
+
+function openCategory(catId) {
+  const cat = CATEGORIES.find(c => c.id === catId);
+  if (!cat) return;
+  document.getElementById('learn-categories').style.display = 'none';
+  document.getElementById('learn-words').style.display = 'block';
+  document.getElementById('catTitle').innerHTML = cat.emoji + ' ' + cat.name + ' (' + cat.nep + ')';
+
+  const grid = document.getElementById('wordsGrid');
+  grid.innerHTML = cat.words.map((w, i) => {
+    const key = cat.id + ':' + w.n;
+    const isLearned = state.learnedWords.includes(key);
+    return `<div class="word-card${isLearned?' learned':''}" onclick="markLearned('${cat.id}','${w.n.replace(/'/g,"\\'")}',this)">
+      ${isLearned ? '<span class="learned-badge">✓</span>' : ''}
+      <button class="sound-btn" onclick="event.stopPropagation();speak('${w.n.replace(/'/g,"\\'")}')">🔊</button>
+      <span class="word-emoji">${w.em}</span>
+      <span class="word-nep">${w.n}</span>
+      <div class="word-roman">${w.r}</div>
+      <div class="word-eng">${w.e}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('mainArea').scrollTop = 0;
+}
+
+function markLearned(catId, nep, el) {
+  const key = catId + ':' + nep;
+  if (!state.learnedWords.includes(key)) {
+    state.learnedWords.push(key);
+    state.wordsLearned++;
+    addPoints(5);
+    el.classList.add('learned');
+    el.insertAdjacentHTML('afterbegin', '<span class="learned-badge">✓</span>');
+    showToast('✅ +5 pts — Great job!');
+    speak(nep);
+  }
+}
+
+document.getElementById('backToCats').addEventListener('click', () => {
+  document.getElementById('learn-words').style.display = 'none';
+  document.getElementById('learn-categories').style.display = 'block';
+  renderCategories();
+});
+
+// ═══════════════════════════════════════════════════════════
+//  QUIZ
+// ═══════════════════════════════════════════════════════════
+let quizItem = null;
+let quizAnswered = false;
+
+function getAllWords() {
+  const all = [];
+  CATEGORIES.forEach(cat => {
+    cat.words.forEach(w => all.push({...w, catId: cat.id}));
+  });
+  return all;
+}
+
+function renderQuiz() {
+  document.getElementById('quizScoreDisplay').textContent =
+    state.quizCorrect + ' / ' + state.quizTotal + ' correct';
+  loadQuizQuestion();
+}
+
+function loadQuizQuestion() {
+  const all = getAllWords();
+  quizItem = all[Math.floor(Math.random() * all.length)];
+  quizAnswered = false;
+
+  // 3 wrong options + 1 correct
+  const wrong = [];
+  const shuffled = all.filter(w => w.n !== quizItem.n).sort(() => Math.random() - 0.5);
+  for (let i = 0; i < 3 && i < shuffled.length; i++) wrong.push(shuffled[i]);
+  const options = [...wrong, quizItem].sort(() => Math.random() - 0.5);
+
+  // Randomly choose question type: show Nepali → pick English, or show English → pick Nepali
+  const mode = Math.random() > 0.5 ? 'nep2eng' : 'eng2nep';
+
+  document.getElementById('quizArea').innerHTML = `
+    <div class="quiz-question">
+      <div class="quiz-prompt">${mode === 'nep2eng' ? 'What does this mean in English?' : 'Which Nepali word means:'}</div>
+      <div class="quiz-word">${mode === 'nep2eng' ? quizItem.em + ' ' + quizItem.n : quizItem.em + ' ' + quizItem.e}</div>
+      <div class="quiz-word-small">${mode === 'nep2eng' ? quizItem.r : ''}</div>
+      <button class="quiz-sound-btn" onclick="speak('${quizItem.n.replace(/'/g,"\\'")}')">🔊 Listen</button>
+    </div>
+    <div class="quiz-options">
+      ${options.map(opt => `<button class="quiz-opt" onclick="checkAnswer(this,'${opt.n.replace(/'/g,"\\'")}')">${mode === 'nep2eng' ? opt.e : opt.n}</button>`).join('')}
+    </div>
+    <div id="quizResult" style="display:none;"></div>
+  `;
+}
+
+function checkAnswer(btn, chosen) {
+  if (quizAnswered) return;
+  quizAnswered = true;
+  const correct = chosen === quizItem.n;
+  const opts = document.querySelectorAll('.quiz-opt');
+  opts.forEach(o => { o.disabled = true; });
+
+  // Find correct button
+  opts.forEach(o => {
+    if (o.textContent === quizItem.n || o.textContent === quizItem.e) {
+      // Highlight correct by checking if this option's text matches
+    }
+  });
+
+  // Mark selected
+  btn.classList.add(correct ? 'correct' : 'wrong');
+
+  // Mark the correct answer
+  opts.forEach(o => {
+    const t = o.textContent.trim();
+    if (t === quizItem.e || t === quizItem.n) {
+      o.classList.add('correct');
+    }
+  });
+
+  state.quizTotal++;
+  if (correct) {
+    state.quizCorrect++;
+    state.quizzesDone++;
+    addPoints(10);
+    showToast('🎉 Correct! +10 pts');
+  } else {
+    showToast('❌ Try again next time!');
+  }
+  saveState();
+
+  const res = document.getElementById('quizResult');
+  res.style.display = 'block';
+  res.className = 'quiz-result ' + (correct ? 'correct' : 'wrong');
+  res.innerHTML = (correct ? '🎉 Correct! ' : '❌ Answer: ') + quizItem.n + ' = ' + quizItem.e +
+    `<button class="quiz-next-btn" onclick="renderQuiz()">Next Question →</button>`;
+
+  document.getElementById('quizScoreDisplay').textContent =
+    state.quizCorrect + ' / ' + state.quizTotal + ' correct';
+}
+
+// ═══════════════════════════════════════════════════════════
+//  TRACE
+// ═══════════════════════════════════════════════════════════
+let traceIdx = 0;
+let isDrawing = false;
+let lastX = 0, lastY = 0;
+
+function getCanvas() { return document.getElementById('traceCanvas'); }
+function getCtx() { return getCanvas().getContext('2d'); }
+
+function renderTraceLetters() {
+  const row = document.getElementById('traceLettersRow');
+  row.innerHTML = TRACE_LETTERS.map((l, i) =>
+    `<div class="trace-letter-chip${i===traceIdx?' active':''}" onclick="setTraceLetter(${i})">${l.n}</div>`
+  ).join('');
+}
+
+function setTraceLetter(idx) {
+  traceIdx = idx;
+  renderTraceLetters();
+  drawTraceBackground();
+  const l = TRACE_LETTERS[idx];
+  document.getElementById('traceLetterDisplay').textContent = l.n + ' (' + l.r + ')';
+  document.getElementById('traceLetterSub').textContent = 'Trace the letter with your finger or mouse';
+}
+
+function drawTraceBackground() {
+  const canvas = getCanvas();
+  const ctx = getCtx();
+  const letter = TRACE_LETTERS[traceIdx];
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Background
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Grid lines (optional light guide)
+  ctx.strokeStyle = '#f0f0f0';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(canvas.width/2, 0); ctx.lineTo(canvas.width/2, canvas.height);
+  ctx.moveTo(0, canvas.height/2); ctx.lineTo(canvas.width, canvas.height/2);
+  ctx.stroke();
+
+  // Draw letter in light gray as guide
+  ctx.font = 'bold 180px serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = 'rgba(83, 74, 183, 0.12)';
+  ctx.fillText(letter.n, canvas.width/2, canvas.height/2);
+
+  // Border
+  ctx.strokeStyle = '#e0e0e0';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(1, 1, canvas.width-2, canvas.height-2);
+}
+
+function setupTraceCanvas() {
+  const canvas = getCanvas();
+
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    if (e.touches) {
+      return {
+        x: (e.touches[0].clientX - rect.left) * scaleX,
+        y: (e.touches[0].clientY - rect.top) * scaleY
+      };
+    }
+    return {
+      x: (e.clientX - rect.left) * scaleX,
+      y: (e.clientY - rect.top) * scaleY
+    };
+  }
+
+  function startDraw(e) {
+    e.preventDefault();
+    isDrawing = true;
+    const {x,y} = getPos(e);
+    lastX = x; lastY = y;
+  }
+
+  function draw(e) {
+    e.preventDefault();
+    if (!isDrawing) return;
+    const {x,y} = getPos(e);
+    const ctx = getCtx();
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
+    ctx.lineTo(x, y);
+    ctx.strokeStyle = '#534AB7';
+    ctx.lineWidth = 6;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.stroke();
+    lastX = x; lastY = y;
+  }
+
+  function endDraw(e) {
+    if (!isDrawing) return;
+    isDrawing = false;
+    // Count as traced
+    state.lettersTraced++;
+    addPoints(2);
+    saveState();
+  }
+
+  canvas.addEventListener('mousedown', startDraw);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseup', endDraw);
+  canvas.addEventListener('mouseleave', endDraw);
+  canvas.addEventListener('touchstart', startDraw, {passive: false});
+  canvas.addEventListener('touchmove', draw, {passive: false});
+  canvas.addEventListener('touchend', endDraw);
+}
+
+document.getElementById('traceClearBtn').addEventListener('click', () => {
+  drawTraceBackground();
+  showToast('🧹 Cleared! Try again');
+});
+document.getElementById('traceSoundBtn').addEventListener('click', () => {
+  speak(TRACE_LETTERS[traceIdx].n);
+});
+document.getElementById('traceNextBtn').addEventListener('click', () => {
+  traceIdx = (traceIdx + 1) % TRACE_LETTERS.length;
+  setTraceLetter(traceIdx);
+  showToast('✏️ Next letter: ' + TRACE_LETTERS[traceIdx].n);
+});
+
+// ═══════════════════════════════════════════════════════════
+//  VIDEOS
+// ═══════════════════════════════════════════════════════════
+function renderVideos() {
+  const grid = document.getElementById('videosGrid');
+  grid.innerHTML = VIDEOS.map((v, i) => `
+    <div class="video-card" onclick="openVideo('${v.id}',${i})">
+      <div class="video-thumb">
+        <img src="https://img.youtube.com/vi/${v.id}/mqdefault.jpg" alt="${v.title}" loading="lazy"
+          onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22320%22 height=%22180%22><rect fill=%22%23534AB7%22 width=%22320%22 height=%22180%22/><text x=%22160%22 y=%2295%22 fill=%22white%22 text-anchor=%22middle%22 font-size=%2240%22>▶</text></svg>'">
+        <div class="video-play-icon">▶</div>
+      </div>
+      <div class="video-info">
+        <div class="video-title">${v.title}</div>
+        <div class="video-desc">${v.desc}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openVideo(id, idx) {
+  document.getElementById('videoIframe').src = 'https://www.youtube.com/embed/' + id + '?autoplay=1&rel=0';
+  document.getElementById('videoModal').classList.add('open');
+  state.videosWatched++;
+  addPoints(5);
+  saveState();
+  showToast('🎬 +5 pts — Enjoy the video!');
+}
+
+function closeVideo() {
+  document.getElementById('videoModal').classList.remove('open');
+  document.getElementById('videoIframe').src = '';
+}
+
+document.getElementById('videoModal').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('videoModal')) closeVideo();
+});
+
+// ═══════════════════════════════════════════════════════════
+//  BADGES
+// ═══════════════════════════════════════════════════════════
+function renderBadges() {
+  // Stars (every 200 pts = 1 star, max 5)
+  const stars = Math.min(5, Math.floor(state.points / 200));
+  const starsRow = document.getElementById('starsRow');
+  starsRow.innerHTML = Array.from({length:5}, (_,i) => i < stars ? '⭐' : '☆').join('');
+
+  document.getElementById('statWords').textContent = state.wordsLearned;
+  document.getElementById('statQuiz').textContent = state.quizzesDone;
+  document.getElementById('statPoints').textContent = state.points;
+
+  const grid = document.getElementById('badgesGrid');
+  grid.innerHTML = BADGES.map(b => {
+    const earned = b.req(state);
+    return `<div class="badge-item${earned?'':' locked'}">
+      <span class="badge-icon">${b.icon}</span>
+      <div class="badge-name">${b.name}</div>
+      <div class="badge-desc">${b.desc}</div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  PWA: SERVICE WORKER
+// ═══════════════════════════════════════════════════════════
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════
+function init() {
+  loadState();
+  updateHeaderScore();
+  renderCategories();
+  renderVideos();
+  setupTraceCanvas();
+  setTraceLetter(0);
+  renderTraceLetters();
+  renderQuiz();
+
+  // Load voices async (some browsers need this)
+  if (window.speechSynthesis) {
+    window.speechSynthesis.onvoiceschanged = () => {};
+    window.speechSynthesis.getVoices();
+  }
+}
+
+init();
+</script>
+</body>
+</html>
