@@ -1034,13 +1034,6 @@ function checkAnswer(btn, chosen) {
   const opts = document.querySelectorAll('.quiz-opt');
   opts.forEach(o => { o.disabled = true; });
 
-  // Find correct button
-  opts.forEach(o => {
-    if (o.textContent === quizItem.n || o.textContent === quizItem.e) {
-      // Highlight correct by checking if this option's text matches
-    }
-  });
-
   // Mark selected
   btn.classList.add(correct ? 'correct' : 'wrong');
 
@@ -1053,9 +1046,9 @@ function checkAnswer(btn, chosen) {
   });
 
   state.quizTotal++;
+  state.quizzesDone++;
   if (correct) {
     state.quizCorrect++;
-    state.quizzesDone++;
     addPoints(10);
     showToast('🎉 Correct! +10 pts');
   } else {
@@ -1079,6 +1072,7 @@ function checkAnswer(btn, chosen) {
 let traceIdx = 0;
 let isDrawing = false;
 let lastX = 0, lastY = 0;
+let hasDrawnStroke = false;
 
 function getCanvas() { return document.getElementById('traceCanvas'); }
 function getCtx() { return getCanvas().getContext('2d'); }
@@ -1171,15 +1165,18 @@ function setupTraceCanvas() {
     ctx.lineJoin = 'round';
     ctx.stroke();
     lastX = x; lastY = y;
+    hasDrawnStroke = true;
   }
 
   function endDraw(e) {
     if (!isDrawing) return;
     isDrawing = false;
-    // Count as traced
-    state.lettersTraced++;
-    addPoints(2);
-    saveState();
+    if (hasDrawnStroke) {
+      hasDrawnStroke = false;
+      state.lettersTraced++;
+      addPoints(2);
+      saveState();
+    }
   }
 
   canvas.addEventListener('mousedown', startDraw);
@@ -1213,7 +1210,7 @@ function renderVideos() {
     <div class="video-card" onclick="openVideo('${v.id}',${i})">
       <div class="video-thumb">
         <img src="https://img.youtube.com/vi/${v.id}/mqdefault.jpg" alt="${v.title}" loading="lazy"
-          onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22320%22 height=%22180%22><rect fill=%22%23534AB7%22 width=%22320%22 height=%22180%22/><text x=%22160%22 y=%2295%22 fill=%22white%22 text-anchor=%22middle%22 font-size=%2240%22>▶</text></svg>'">
+          onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22320%22%20height%3D%22180%22%3E%3Crect%20fill%3D%22%23534AB7%22%20width%3D%22320%22%20height%3D%22180%22%2F%3E%3Ctext%20x%3D%22160%22%20y%3D%2295%22%20fill%3D%22white%22%20text-anchor%3D%22middle%22%20font-size%3D%2240%22%3E%E2%96%B6%3C%2Ftext%3E%3C%2Fsvg%3E'">
         <div class="video-play-icon">▶</div>
       </div>
       <div class="video-info">
